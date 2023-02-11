@@ -22,6 +22,7 @@
 		232D0B4D299719D600C4A428 /* ScanditTXT in Frameworks */ = {isa = PBXBuildFile; productRef = 232D0B4C299719D600C4A428 /* ScanditTXT */; };
 		232D0B4F299719D600C4A428 /* ScanditTextCapture in Frameworks */ = {isa = PBXBuildFile; productRef = 232D0B4E299719D600C4A428 /* ScanditTextCapture */; };
 		232D0B5129971FCB00C4A428 /* Scandit.plist in Resources */ = {isa = PBXBuildFile; fileRef = 232D0B5029971FCB00C4A428 /* Scandit.plist */; };
+		232D0B5429976BBA00C4A428 /* BarcodeScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B5329976BBA00C4A428 /* BarcodeScanResult.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		232D0B35299713A200C4A428 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		232D0B37299713A200C4A428 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		232D0B5029971FCB00C4A428 /* Scandit.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Scandit.plist; sourceTree = "<group>"; };
+		232D0B5329976BBA00C4A428 /* BarcodeScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanResult.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,7 @@
 		232D0B28299713A100C4A428 /* RapidScanner */ = {
 			isa = PBXGroup;
 			children = (
+				232D0B5229976BA800C4A428 /* Models */,
 				232D0B29299713A100C4A428 /* AppDelegate.swift */,
 				232D0B2B299713A100C4A428 /* SceneDelegate.swift */,
 				232D0B2D299713A100C4A428 /* ViewController.swift */,
@@ -83,6 +86,14 @@
 				232D0B5029971FCB00C4A428 /* Scandit.plist */,
 			);
 			path = RapidScanner;
+			sourceTree = "<group>";
+		};
+		232D0B5229976BA800C4A428 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				232D0B5329976BBA00C4A428 /* BarcodeScanResult.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,6 +183,7 @@
 			files = (
 				232D0B2E299713A100C4A428 /* ViewController.swift in Sources */,
 				232D0B2A299713A100C4A428 /* AppDelegate.swift in Sources */,
+				232D0B5429976BBA00C4A428 /* BarcodeScanResult.swift in Sources */,
 				232D0B2C299713A100C4A428 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

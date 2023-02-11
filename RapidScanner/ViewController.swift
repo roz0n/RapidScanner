@@ -15,6 +15,12 @@ class ViewController: UIViewController {
   var barcodeCapture: BarcodeCapture?
   var camera: Camera?
   
+  var latestScanResult: BarcodeScanResult? {
+    didSet {
+      print("New scan: \(latestScanResult) :: \(Date())")
+    }
+  }
+  
   var licenseKey: Dictionary<String, String>? {
     if let path = Bundle.main.path(forResource: "Scandit", ofType: "plist"),
        let licenseKey = NSDictionary(contentsOfFile: path) {
@@ -69,6 +75,7 @@ private extension ViewController {
     self.context = DataCaptureContext(licenseKey: self.licenseKey!["LicenseKey"]!)
     self.barcodeCapture = BarcodeCapture(context: context, settings: getBarcodeSettings())
     self.barcodeCapture?.addListener(self)
+    self.barcodeCapture?.feedback.success = Feedback(vibration: .successHapticFeedback, sound: nil)
     
     self.camera = getCamera()
     
@@ -85,6 +92,7 @@ private extension ViewController {
     
     captureView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     captureView.addOverlay(overlay)
+    
     view.addSubview(captureView)
   }
   
@@ -96,10 +104,30 @@ extension ViewController: BarcodeCaptureListener {
   
   func barcodeCapture(_ barcodeCapture: BarcodeCapture, didScanIn session: BarcodeCaptureSession, frameData: FrameData) {
     let recognizedBarcodes = session.newlyRecognizedBarcodes
+    let scanResultString = recognizedBarcodes.first?.jsonString
     
-    for barcode in recognizedBarcodes {
-      print("\(barcode.jsonString) :: \(barcode.symbology)")
+    // Decode scan data
+    guard let scanData = scanResultString,
+          let scanDataRaw = scanData.data(using: .utf8) else {
+      return
+    }
+    
+    guard let decodedScanData = try? JSONDecoder().decode(BarcodeScanResult.self, from: scanDataRaw) else {
+      return
+    }
+    
+    // Make sure there's a new scan, otherwise return
+    guard decodedScanData != latestScanResult else { return }
+    
+    // Set the new scan
+    latestScanResult = decodedScanData
+    
+    camera?.switch(toDesiredState: .standby) { _ in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+          self?.camera?.switch(toDesiredState: .on)
+        }
     }
   }
   
 }
+
