@@ -17,31 +17,31 @@ class ViewController: UIViewController {
   
   var latestScanResult: BarcodeScanResult? {
     didSet {
-      print("New scan: \(latestScanResult) :: \(Date())")
+      if let latestScanResult = latestScanResult {
+        print("New scan: \(latestScanResult) :: \(Date())")
+      }
     }
   }
   
   var licenseKey: Dictionary<String, String>? {
-    if let path = Bundle.main.path(forResource: "Scandit", ofType: "plist"),
-       let licenseKey = NSDictionary(contentsOfFile: path) {
-      return licenseKey as? Dictionary
-    } else {
-      return nil
-    }
+    return NSDictionary(contentsOfFile: Bundle.main.path(forResource: "Scandit", ofType: "plist")!) as? Dictionary
   }
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    configureCapture()
-    configureFrameSource()
-    configureCaptureView()
-    
+    configureScandit()
     configureView()
   }
   
   private func configureView() {
     view.backgroundColor = .systemRed
+  }
+  
+  private func configureScandit() {
+    configureCapture()
+    configureFrameSource()
+    configureCaptureView()
   }
   
 }
@@ -68,17 +68,19 @@ private extension ViewController {
     let camera = Camera.default!
     
     camera.apply(cameraSettings)
+    
     return camera
   }
   
   private func configureCapture() {
-    self.context = DataCaptureContext(licenseKey: self.licenseKey!["LicenseKey"]!)
-    self.barcodeCapture = BarcodeCapture(context: context, settings: getBarcodeSettings())
+    let settings = getBarcodeSettings()
+    let camera = getCamera()
+    
+    self.context = DataCaptureContext(licenseKey: self.licenseKey!["0"]!)
+    self.barcodeCapture = BarcodeCapture(context: context, settings: settings)
     self.barcodeCapture?.addListener(self)
-    self.barcodeCapture?.feedback.success = Feedback(vibration: .successHapticFeedback, sound: nil)
-    
-    self.camera = getCamera()
-    
+    self.barcodeCapture?.feedback.success = Feedback(vibration: nil, sound: nil)
+    self.camera = camera
   }
   
   private func configureFrameSource() {
@@ -116,12 +118,14 @@ extension ViewController: BarcodeCaptureListener {
       return
     }
     
-    // Make sure there's a new scan, otherwise return
-    guard decodedScanData != latestScanResult else { return }
+    // Ensure scan result is new
+    if decodedScanData == latestScanResult {
+      return
+    } else {
+      latestScanResult = decodedScanData
+    }
     
-    // Set the new scan
-    latestScanResult = decodedScanData
-    
+    // Set camera to standby, stagger return to on state by half a second
     camera?.switch(toDesiredState: .standby) { _ in
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
           self?.camera?.switch(toDesiredState: .on)
