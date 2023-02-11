@@ -88,3 +88,8 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# Scandit
+RapidScanner/Scandit.plist
+.DS_Store
+
