@@ -119,17 +119,15 @@ extension ViewController: BarcodeCaptureListener {
     }
     
     // Ensure scan result is new
-    if decodedScanData == latestScanResult {
-      return
-    } else {
+    if decodedScanData != latestScanResult {
       latestScanResult = decodedScanData
-    }
-    
-    // Set camera to standby, stagger return to on state by half a second
-    camera?.switch(toDesiredState: .standby) { _ in
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-          self?.camera?.switch(toDesiredState: .on)
-        }
+      
+      // Set camera to standby, stagger return to "on" state by half a second
+      camera?.switch(toDesiredState: .standby) { _ in
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0) { [weak self] in
+            self?.camera?.switch(toDesiredState: .on)
+          }
+      }
     }
   }
   
