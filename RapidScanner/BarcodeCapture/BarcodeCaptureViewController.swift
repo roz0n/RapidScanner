@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  BarcodeCaptureViewController.swift
 //  RapidScanner
 //
 //  Created by Arnaldo Rozon on 2/10/23.
@@ -9,16 +9,21 @@ import UIKit
 import ScanditCaptureCore
 import ScanditBarcodeCapture
 
-class ViewController: UIViewController {
+class BarcodeCaptureViewController: UIViewController {
   
   var context: DataCaptureContext?
   var barcodeCapture: BarcodeCapture?
+  var captureView: DataCaptureView?
   var camera: Camera?
   
   var latestScanResult: BarcodeScanResult? {
     didSet {
       if let latestScanResult = latestScanResult {
         print("New scan: \(latestScanResult) :: \(Date())")
+        
+        DispatchQueue.main.async { [weak self] in
+          self?.presentCaptureResultTable()
+        }
       }
     }
   }
@@ -29,13 +34,10 @@ class ViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    view.backgroundColor = .systemBackground
     
     configureScandit()
-    configureView()
-  }
-  
-  private func configureView() {
-    view.backgroundColor = .systemRed
+    configureLayouts()
   }
   
   private func configureScandit() {
@@ -46,9 +48,30 @@ class ViewController: UIViewController {
   
 }
 
+// MARK: - Move to Coordinator
+
+private extension BarcodeCaptureViewController {
+  
+  func presentCaptureResultTable() {
+    let resultController = CaptureResultTableViewController()
+    resultController.modalPresentationStyle = .formSheet
+    resultController.isModalInPresentation = true
+    
+    if let sheet = resultController.sheetPresentationController {
+      sheet.prefersGrabberVisible = true
+      sheet.detents = [.medium(), .large(), .custom(resolver: { context in
+        return 100
+      })]
+    }
+    
+    present(resultController, animated: true)
+  }
+  
+}
+
 // MARK: - Scandit Configuration
 
-private extension ViewController {
+private extension BarcodeCaptureViewController {
   
   private func getBarcodeSettings() -> BarcodeCaptureSettings {
     let settings = BarcodeCaptureSettings()
@@ -89,20 +112,17 @@ private extension ViewController {
   }
   
   private func configureCaptureView() {
-    let captureView = DataCaptureView(context: context, frame: view.bounds)
+    captureView = DataCaptureView(context: context, frame: view.bounds)
+    
     let overlay = BarcodeCaptureOverlay(barcodeCapture: barcodeCapture!, view: captureView)
-    
-    captureView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    captureView.addOverlay(overlay)
-    
-    view.addSubview(captureView)
+    captureView?.addOverlay(overlay)
   }
   
 }
 
 // MARK: - BarcodeCaptureListener
 
-extension ViewController: BarcodeCaptureListener {
+extension BarcodeCaptureViewController: BarcodeCaptureListener {
   
   func barcodeCapture(_ barcodeCapture: BarcodeCapture, didScanIn session: BarcodeCaptureSession, frameData: FrameData) {
     let recognizedBarcodes = session.newlyRecognizedBarcodes
@@ -118,9 +138,10 @@ extension ViewController: BarcodeCaptureListener {
       return
     }
     
-    // Ensure scan result is new
+    // If scan result is new, update the stored variable and do some processing
     if decodedScanData != latestScanResult {
       latestScanResult = decodedScanData
+      UINotificationFeedbackGenerator().notificationOccurred(.success)
       
       // Set camera to standby, stagger return to "on" state by half a second
       camera?.switch(toDesiredState: .standby) { _ in
@@ -133,3 +154,28 @@ extension ViewController: BarcodeCaptureListener {
   
 }
 
+// MARK: - Layout
+
+private extension BarcodeCaptureViewController {
+  
+  func configureLayouts() {
+    layoutCaptureView()
+  }
+  
+  func layoutCaptureView() {
+    guard let captureView = captureView else {
+      return
+    }
+    
+    view.addSubview(captureView)
+    captureView.translatesAutoresizingMaskIntoConstraints = false
+    
+    NSLayoutConstraint.activate([
+      captureView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+      captureView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+      captureView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+      captureView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+    ])
+  }
+  
+}

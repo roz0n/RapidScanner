@@ -18,8 +18,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
     guard let windowScene = (scene as? UIWindowScene) else { return }
     
+    let rootController = BarcodeCaptureViewController()
+    rootController.title = "Capture"
+    rootController.tabBarItem = UITabBarItem(title: "Capture", image: UIImage(systemName: "barcode"), tag: 0)
+    
+    let tabController = UITabBarController()
+    tabController.viewControllers = [rootController]
+    
     window = UIWindow(windowScene: windowScene)
-    window?.rootViewController = ViewController()
+    window?.rootViewController = tabController
     window?.makeKeyAndVisible()
   }
 
