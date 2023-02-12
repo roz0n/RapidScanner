@@ -30,17 +30,35 @@ class BarcodeCaptureViewController: UIViewController {
   
   // MARK: - Increment Quantity
   
-  var incrementButtonTopContraint: NSLayoutConstraint?
+  var scanResultButtonsContainerTopConstraint: NSLayoutConstraint?
   
-  lazy var incrementButton: UIButton = {
+  lazy var adjustQuantityButton: UIButton = {
     let button = UIButton(type: .roundedRect)
-    button.setTitle("Press & Hold to Add More", for: .normal)
+    button.setImage(UIImage(systemName: "bag.badge.plus"), for: .normal)
     button.contentEdgeInsets = UIEdgeInsets(top: 16, left: 8, bottom: 16, right: 8)
     button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
     button.layer.cornerRadius = 12
     button.tintColor = .white
     button.backgroundColor = .systemBackground.withAlphaComponent(0.5)
     return button
+  }()
+  
+  lazy var addToCartButton: UIButton = {
+    let button = UIButton(type: .roundedRect)
+    button.setImage(UIImage(systemName: "cart.badge.plus"), for: .normal)
+    button.contentEdgeInsets = UIEdgeInsets(top: 16, left: 8, bottom: 16, right: 8)
+    button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+    button.layer.cornerRadius = 12
+    button.tintColor = .white
+    button.backgroundColor = .systemBackground.withAlphaComponent(0.5)
+    return button
+  }()
+  
+  lazy var scanResultButtonsContainer: UIStackView = {
+    let stack = UIStackView()
+    stack.spacing = UIStackView.spacingUseSystem
+    stack.distribution = .fillEqually
+    return stack
   }()
   
   // MARK: - Properties
@@ -63,10 +81,12 @@ class BarcodeCaptureViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .white
     
     setupScandit()
     setupPanGesture()
+    setupIncrementButton()
+    setupContinueButton()
+    
     setupContraints()
   }
   
@@ -115,7 +135,11 @@ private extension BarcodeCaptureViewController {
   }
   
   private func setupIncrementButton() {
-    incrementButton.addTarget(self, action: #selector(handleIncrementButtonTap(_:)), for: .touchUpInside)
+    adjustQuantityButton.addTarget(self, action: #selector(handleIncrementButtonTap(_:)), for: .touchUpInside)
+  }
+  
+  private func setupContinueButton() {
+    addToCartButton.addTarget(self, action: #selector(handleContinueButtonTap(_:)), for: .touchUpInside)
   }
   
 }
@@ -142,8 +166,88 @@ private extension BarcodeCaptureViewController {
     let camera = Camera.default!
     
     camera.apply(cameraSettings)
-    
     return camera
+  }
+  
+}
+
+// MARK: - Helpers
+
+extension BarcodeCaptureViewController {
+  
+  private func hidePostScanButtons() {
+    camera?.switch(toDesiredState: .on) { _ in
+        DispatchQueue.main.async {
+          UIView.animate(withDuration: 0.75,
+                         delay: 0,
+                         usingSpringWithDamping: 0.75,
+                         initialSpringVelocity: 0.75,
+                         options: .curveEaseInOut) {
+            self.scanResultButtonsContainerTopConstraint?.constant = -(UIScreen.main.bounds.height / 2)
+            self.view.layoutIfNeeded()
+          }
+        }
+    }
+  }
+  
+  private func showPostScanButtons() {
+    camera?.switch(toDesiredState: .standby) { _ in
+        DispatchQueue.main.async {
+          UIView.animate(withDuration: 0.4,
+                         delay: 0,
+                         usingSpringWithDamping: 0.75,
+                         initialSpringVelocity: 0.75,
+                         options: .curveEaseInOut) {
+            self.scanResultButtonsContainerTopConstraint?.constant = 8
+            self.view.layoutIfNeeded()
+          }
+        }
+    }
+  }
+  
+  private func presentQuantityModal() {
+    let alertController = UIAlertController(title: "Adjust Quantity",
+                                            message: "Enter an amount including the scanned item",
+                                            preferredStyle: .alert)
+    
+    alertController.addTextField { textField in
+      textField.placeholder = "1 or more"
+      textField.isSecureTextEntry = false
+      textField.keyboardType = .decimalPad
+    }
+    
+    let confirmAction = UIAlertAction(title: "OK", style: .default) { _ in
+      guard let field = alertController.textFields?.first else {
+        return
+      }
+      
+      print("Quantity entered: \(field.text)")
+      self.hidePostScanButtons()
+    }
+    
+    let cancelAction = UIAlertAction(title: "Cancel", style: .destructive) { _ in
+      print("Cancelled quantity entry")
+      self.hidePostScanButtons()
+    }
+    
+    alertController.addAction(cancelAction)
+    alertController.addAction(confirmAction)
+    alertController.isModalInPresentation = true
+    
+    present(alertController, animated: true)
+  }
+  
+  private func animateContainerHeight(_ height: CGFloat) {
+    UIView.animate(withDuration: 0.4,
+                   delay: 0,
+                   usingSpringWithDamping: 0.75,
+                   initialSpringVelocity: 0.75,
+                   options: .curveEaseInOut) { [weak self] in
+      self?.checkoutCardHeightConstraint?.constant = height
+      self?.view.layoutIfNeeded()
+    }
+    
+    currentCheckoutCardHeight = height
   }
   
 }
@@ -154,6 +258,12 @@ extension BarcodeCaptureViewController {
   
   @objc func handleIncrementButtonTap(_ sender: UIButton) {
     print("Tapped increment button")
+    presentQuantityModal()
+  }
+  
+  @objc func handleContinueButtonTap(_ sender: UIButton) {
+    print("Tapped continue button")
+    hidePostScanButtons()
   }
   
   @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
@@ -185,18 +295,7 @@ extension BarcodeCaptureViewController {
     }
   }
   
-  private func animateContainerHeight(_ height: CGFloat) {
-    UIView.animate(withDuration: 0.4,
-                   delay: 0,
-                   usingSpringWithDamping: 0.75,
-                   initialSpringVelocity: 0.75,
-                   options: .curveEaseInOut) { [weak self] in
-      self?.checkoutCardHeightConstraint?.constant = height
-      self?.view.layoutIfNeeded()
-    }
-    
-    currentCheckoutCardHeight = height
-  }
+  
   
 }
 
@@ -234,13 +333,8 @@ extension BarcodeCaptureViewController: BarcodeCaptureListener {
       print("This is a duplicate scan")
       
       DispatchQueue.main.async {
-        if self.incrementButtonTopContraint?.constant != 20 {
-          self.incrementButtonTopContraint?.constant = 20
-          self.view.layoutIfNeeded()
-        }
+        self.showPostScanButtons()
       }
-      
-      return
     }
   }
   
@@ -253,7 +347,7 @@ private extension BarcodeCaptureViewController {
   func setupContraints() {
     layoutCaptureView()
     layoutResultView()
-    layoutIncrementButtonView()
+    layoutPostScanContainer()
   }
   
   func layoutCaptureView() {
@@ -286,20 +380,21 @@ private extension BarcodeCaptureViewController {
     checkoutCardHeightConstraint?.isActive = true
   }
   
-  func layoutIncrementButtonView() {
-    incrementButton.translatesAutoresizingMaskIntoConstraints = false
+  func layoutPostScanContainer() {
+    scanResultButtonsContainer.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(scanResultButtonsContainer)
     
-    view.addSubview(incrementButton)
-    view.bringSubviewToFront(incrementButton)
+    scanResultButtonsContainer.addArrangedSubview(adjustQuantityButton)
+    scanResultButtonsContainer.addArrangedSubview(addToCartButton)
     
     NSLayoutConstraint.activate([
-      incrementButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 32),
-      incrementButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -32),
+      scanResultButtonsContainer.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+      scanResultButtonsContainer.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
     ])
     
-    incrementButtonTopContraint = incrementButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
-                                                                       constant: -(UIScreen.main.bounds.height))
-    incrementButtonTopContraint?.isActive = true
+    scanResultButtonsContainerTopConstraint = adjustQuantityButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
+                                                                                 constant: -(UIScreen.main.bounds.height / 2))
+    scanResultButtonsContainerTopConstraint?.isActive = true
   }
   
 }

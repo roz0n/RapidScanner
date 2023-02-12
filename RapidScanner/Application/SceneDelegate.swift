@@ -19,8 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let windowScene = (scene as? UIWindowScene) else { return }
     
     let rootController = BarcodeCaptureViewController()
-    rootController.title = "RapidScanner"
-    rootController.tabBarItem = UITabBarItem(title: "Checkout", image: UIImage(systemName: "barcode"), tag: 0)
+    rootController.tabBarItem = UITabBarItem(title: "Scan", image: UIImage(systemName: "barcode.viewfinder"), tag: 0)
     
     let settingsController = SettingsViewController()
     settingsController.title = "Settings"
