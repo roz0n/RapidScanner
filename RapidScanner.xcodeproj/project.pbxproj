@@ -25,7 +25,6 @@
 		232D0B5429976BBA00C4A428 /* BarcodeScanResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B5329976BBA00C4A428 /* BarcodeScanResult.swift */; };
 		232D0B582997719C00C4A428 /* CheckoutCartTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B572997719C00C4A428 /* CheckoutCartTableViewController.swift */; };
 		232D0B5A29977F2D00C4A428 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B5929977F2D00C4A428 /* SettingsViewController.swift */; };
-		232D0B5D2997823B00C4A428 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B5C2997823B00C4A428 /* ViewController.swift */; };
 		232D0B612998486B00C4A428 /* CheckoutCartDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B602998486B00C4A428 /* CheckoutCartDataSource.swift */; };
 		232D0B6529984BA000C4A428 /* CheckoutCartHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6429984BA000C4A428 /* CheckoutCartHeaderView.swift */; };
 		232D0B6829984C7200C4A428 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6729984C7200C4A428 /* UIViewExtension.swift */; };
@@ -44,7 +43,6 @@
 		232D0B5329976BBA00C4A428 /* BarcodeScanResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanResult.swift; sourceTree = "<group>"; };
 		232D0B572997719C00C4A428 /* CheckoutCartTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutCartTableViewController.swift; sourceTree = "<group>"; };
 		232D0B5929977F2D00C4A428 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
-		232D0B5C2997823B00C4A428 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		232D0B602998486B00C4A428 /* CheckoutCartDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutCartDataSource.swift; sourceTree = "<group>"; };
 		232D0B6429984BA000C4A428 /* CheckoutCartHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutCartHeaderView.swift; sourceTree = "<group>"; };
 		232D0B6729984C7200C4A428 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
@@ -175,7 +173,6 @@
 		232D0B692998880300C4A428 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				232D0B5C2997823B00C4A428 /* ViewController.swift */,
 				232D0B6A2998880B00C4A428 /* Views */,
 			);
 			path = Shared;
@@ -281,7 +278,6 @@
 				232D0B5429976BBA00C4A428 /* BarcodeScanResult.swift in Sources */,
 				232D0B2C299713A100C4A428 /* SceneDelegate.swift in Sources */,
 				232D0B6C2998882E00C4A428 /* GrabberView.swift in Sources */,
-				232D0B5D2997823B00C4A428 /* ViewController.swift in Sources */,
 				232D0B582997719C00C4A428 /* CheckoutCartTableViewController.swift in Sources */,
 				232D0B5A29977F2D00C4A428 /* SettingsViewController.swift in Sources */,
 				232D0B6529984BA000C4A428 /* CheckoutCartHeaderView.swift in Sources */,

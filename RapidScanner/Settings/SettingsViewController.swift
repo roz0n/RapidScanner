@@ -12,8 +12,6 @@ class SettingsViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .systemGray
-    
-    navigationController?.pushViewController(ViewController(), animated: true)
   }
   
 }

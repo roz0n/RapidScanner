@@ -28,7 +28,7 @@ class CheckoutCartHeaderView: UIView {
     button.tintColor = .white
     button.backgroundColor = .clear
     button.contentEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 8)
-    button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+    button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
     button.titleLabel?.textAlignment = .left
     button.isUserInteractionEnabled = false
     return button

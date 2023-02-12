@@ -28,6 +28,21 @@ class BarcodeCaptureViewController: UIViewController {
   // This variable will keep getting updated with the new height
   var currentCheckoutCardHeight: CGFloat = CheckoutCartTableViewController.defaultShowHeight
   
+  // MARK: - Increment Quantity
+  
+  var incrementButtonTopContraint: NSLayoutConstraint?
+  
+  lazy var incrementButton: UIButton = {
+    let button = UIButton(type: .roundedRect)
+    button.setTitle("Press & Hold to Add More", for: .normal)
+    button.contentEdgeInsets = UIEdgeInsets(top: 16, left: 8, bottom: 16, right: 8)
+    button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+    button.layer.cornerRadius = 12
+    button.tintColor = .white
+    button.backgroundColor = .systemBackground.withAlphaComponent(0.5)
+    return button
+  }()
+  
   // MARK: - Properties
   
   var latestScanResult: BarcodeScanResult? {
@@ -52,42 +67,19 @@ class BarcodeCaptureViewController: UIViewController {
     
     setupScandit()
     setupPanGesture()
-    
     setupContraints()
   }
+  
+}
+
+// MARK: - Setup
+
+private extension BarcodeCaptureViewController {
   
   private func setupScandit() {
     setupCapture()
     setupFrameSource()
     setupCaptureView()
-  }
-  
-}
-
-// MARK: - Scandit Configuration
-
-private extension BarcodeCaptureViewController {
-  
-  private func getBarcodeSettings() -> BarcodeCaptureSettings {
-    let settings = BarcodeCaptureSettings()
-    
-    settings.set(symbology: .code128, enabled: true)
-    settings.set(symbology: .code39, enabled: true)
-    settings.set(symbology: .qr, enabled: true)
-    settings.set(symbology: .ean8, enabled: true)
-    settings.set(symbology: .upce, enabled: true)
-    settings.set(symbology: .ean13UPCA, enabled: true)
-    
-    return settings
-  }
-  
-  private func getCamera() -> Camera {
-    let cameraSettings = BarcodeCapture.recommendedCameraSettings
-    let camera = Camera.default!
-    
-    camera.apply(cameraSettings)
-    
-    return camera
   }
   
   private func setupCapture() {
@@ -122,6 +114,48 @@ private extension BarcodeCaptureViewController {
     view.addGestureRecognizer(panGesture)
   }
   
+  private func setupIncrementButton() {
+    incrementButton.addTarget(self, action: #selector(handleIncrementButtonTap(_:)), for: .touchUpInside)
+  }
+  
+}
+
+// MARK: - Scandit Configuration
+
+private extension BarcodeCaptureViewController {
+  
+  private func getBarcodeSettings() -> BarcodeCaptureSettings {
+    let settings = BarcodeCaptureSettings()
+    
+    settings.set(symbology: .code128, enabled: true)
+    settings.set(symbology: .code39, enabled: true)
+    settings.set(symbology: .qr, enabled: true)
+    settings.set(symbology: .ean8, enabled: true)
+    settings.set(symbology: .upce, enabled: true)
+    settings.set(symbology: .ean13UPCA, enabled: true)
+    
+    return settings
+  }
+  
+  private func getCamera() -> Camera {
+    let cameraSettings = BarcodeCapture.recommendedCameraSettings
+    let camera = Camera.default!
+    
+    camera.apply(cameraSettings)
+    
+    return camera
+  }
+  
+}
+
+// MARK: - Gestures
+
+extension BarcodeCaptureViewController {
+  
+  @objc func handleIncrementButtonTap(_ sender: UIButton) {
+    print("Tapped increment button")
+  }
+  
   @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
     let translation = gesture.translation(in: view)
     let isDraggingUp = translation.y < 0
@@ -152,7 +186,11 @@ private extension BarcodeCaptureViewController {
   }
   
   private func animateContainerHeight(_ height: CGFloat) {
-    UIView.animate(withDuration: 0.4) { [weak self] in
+    UIView.animate(withDuration: 0.4,
+                   delay: 0,
+                   usingSpringWithDamping: 0.75,
+                   initialSpringVelocity: 0.75,
+                   options: .curveEaseInOut) { [weak self] in
       self?.checkoutCardHeightConstraint?.constant = height
       self?.view.layoutIfNeeded()
     }
@@ -185,12 +223,24 @@ extension BarcodeCaptureViewController: BarcodeCaptureListener {
       latestScanResult = decodedScanData
       UINotificationFeedbackGenerator().notificationOccurred(.success)
       
-      // Set camera to standby, stagger return to "on" state by half a second
+      // Set camera to standby, stagger return to "on" state by a quarter of a second (the delay might not be needed)
       camera?.switch(toDesiredState: .standby) { _ in
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0) { [weak self] in
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             self?.camera?.switch(toDesiredState: .on)
           }
       }
+    } else {
+      // Handle duplicate scan
+      print("This is a duplicate scan")
+      
+      DispatchQueue.main.async {
+        if self.incrementButtonTopContraint?.constant != 20 {
+          self.incrementButtonTopContraint?.constant = 20
+          self.view.layoutIfNeeded()
+        }
+      }
+      
+      return
     }
   }
   
@@ -203,6 +253,7 @@ private extension BarcodeCaptureViewController {
   func setupContraints() {
     layoutCaptureView()
     layoutResultView()
+    layoutIncrementButtonView()
   }
   
   func layoutCaptureView() {
@@ -226,7 +277,6 @@ private extension BarcodeCaptureViewController {
     view.addSubview(checkoutCardController.view)
     
     NSLayoutConstraint.activate([
-      //      checkoutCardController.view.heightAnchor.constraint(equalToConstant: 64),
       checkoutCardController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
       checkoutCardController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
       checkoutCardController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
@@ -234,6 +284,22 @@ private extension BarcodeCaptureViewController {
     
     checkoutCardHeightConstraint = checkoutCardController.view.heightAnchor.constraint(equalToConstant: checkoutCardDefaultHeight)
     checkoutCardHeightConstraint?.isActive = true
+  }
+  
+  func layoutIncrementButtonView() {
+    incrementButton.translatesAutoresizingMaskIntoConstraints = false
+    
+    view.addSubview(incrementButton)
+    view.bringSubviewToFront(incrementButton)
+    
+    NSLayoutConstraint.activate([
+      incrementButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 32),
+      incrementButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -32),
+    ])
+    
+    incrementButtonTopContraint = incrementButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
+                                                                       constant: -(UIScreen.main.bounds.height))
+    incrementButtonTopContraint?.isActive = true
   }
   
 }
