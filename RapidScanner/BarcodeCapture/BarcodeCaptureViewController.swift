@@ -16,6 +16,8 @@ class BarcodeCaptureViewController: UIViewController {
   var captureView: DataCaptureView?
   var camera: Camera?
   
+  var captureResultController = CheckoutCartTableViewController()
+  
   var latestScanResult: BarcodeScanResult? {
     didSet {
       if let latestScanResult = latestScanResult {
@@ -34,10 +36,10 @@ class BarcodeCaptureViewController: UIViewController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.backgroundColor = .systemBackground
+    view.backgroundColor = .white
     
     configureScandit()
-    configureLayouts()
+    configureLayout()
   }
   
   private func configureScandit() {
@@ -53,7 +55,7 @@ class BarcodeCaptureViewController: UIViewController {
 private extension BarcodeCaptureViewController {
   
   func presentCaptureResultTable() {
-    let resultController = CaptureResultTableViewController()
+    let resultController = CheckoutCartTableViewController()
     resultController.modalPresentationStyle = .formSheet
     resultController.isModalInPresentation = true
     
@@ -64,7 +66,7 @@ private extension BarcodeCaptureViewController {
       })]
     }
     
-    present(resultController, animated: true)
+    tabBarController?.present(resultController, animated: true)
   }
   
 }
@@ -158,8 +160,9 @@ extension BarcodeCaptureViewController: BarcodeCaptureListener {
 
 private extension BarcodeCaptureViewController {
   
-  func configureLayouts() {
+  func configureLayout() {
     layoutCaptureView()
+    layoutResultView()
   }
   
   func layoutCaptureView() {
@@ -171,10 +174,22 @@ private extension BarcodeCaptureViewController {
     captureView.translatesAutoresizingMaskIntoConstraints = false
     
     NSLayoutConstraint.activate([
-      captureView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+      captureView.topAnchor.constraint(equalTo: view.topAnchor),
       captureView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
       captureView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
       captureView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+    ])
+  }
+  
+  func layoutResultView() {
+    captureResultController.view.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(captureResultController.view)
+    
+    NSLayoutConstraint.activate([
+      captureResultController.view.heightAnchor.constraint(equalToConstant: 64),
+      captureResultController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+      captureResultController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+      captureResultController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
     ])
   }
   
