@@ -38,10 +38,10 @@ class CheckoutCartHeaderView: UIView {
     let button = UIButton(type: .system)
     button.setTitle("0", for: .normal)
     button.tintColor = .white
-    button.backgroundColor = .clear
-    button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+    button.titleLabel?.font = .monospacedSystemFont(ofSize: 16, weight: .medium)
     button.titleLabel?.textAlignment = .left
     button.isUserInteractionEnabled = false
+    button.layer.cornerRadius = 16
     return button
   }()
   
@@ -61,8 +61,8 @@ class CheckoutCartHeaderView: UIView {
     super.init(frame: frame)
     backgroundColor = .systemBackground
     
-    configureView()
-    configureLayout()
+    setupView()
+    setupContraints()
   }
   
   required init?(coder: NSCoder) {
@@ -71,7 +71,7 @@ class CheckoutCartHeaderView: UIView {
   
   // MARK: - Configurations
   
-  private func configureView() {
+  private func setupView() {
     clipsToBounds = true
     layer.cornerRadius = 12
     layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
@@ -79,11 +79,11 @@ class CheckoutCartHeaderView: UIView {
   
 }
 
-// MARK: - Layout
+// MARK: - Constraints
 
 private extension CheckoutCartHeaderView {
   
-  func configureLayout() {
+  func setupContraints() {
     layoutContainer()
     layoutCheckoutLabelContainer()
     

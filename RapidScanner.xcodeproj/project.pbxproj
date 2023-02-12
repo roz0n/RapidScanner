@@ -138,12 +138,12 @@
 			path = Settings;
 			sourceTree = "<group>";
 		};
-		232D0B5F2998483E00C4A428 /* Sources */ = {
+		232D0B5F2998483E00C4A428 /* Data Sources */ = {
 			isa = PBXGroup;
 			children = (
 				232D0B602998486B00C4A428 /* CheckoutCartDataSource.swift */,
 			);
-			path = Sources;
+			path = "Data Sources";
 			sourceTree = "<group>";
 		};
 		232D0B622998487000C4A428 /* CheckoutCart */ = {
@@ -151,7 +151,7 @@
 			children = (
 				232D0B63299848C900C4A428 /* Views */,
 				232D0B572997719C00C4A428 /* CheckoutCartTableViewController.swift */,
-				232D0B5F2998483E00C4A428 /* Sources */,
+				232D0B5F2998483E00C4A428 /* Data Sources */,
 			);
 			path = CheckoutCart;
 			sourceTree = "<group>";

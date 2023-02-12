@@ -16,16 +16,26 @@ class BarcodeCaptureViewController: UIViewController {
   var captureView: DataCaptureView?
   var camera: Camera?
   
-  var captureResultController = CheckoutCartTableViewController()
+  // MARK: - Checkout Card
+  
+  var checkoutCardController = CheckoutCartTableViewController()
+  var checkoutCardHeightConstraint: NSLayoutConstraint?
+  
+  let checkoutCardMaxHeight = (UIScreen.main.bounds.height - (CheckoutCartTableViewController.defaultShowHeight * 3))
+  let checkoutCardDefaultHeight: CGFloat = CheckoutCartTableViewController.defaultShowHeight
+  let checkoutCardDismissableHeight: CGFloat = (CheckoutCartTableViewController.defaultShowHeight * 2)
+  
+  // This variable will keep getting updated with the new height
+  var currentCheckoutCardHeight: CGFloat = CheckoutCartTableViewController.defaultShowHeight
+  
+  // MARK: - Properties
   
   var latestScanResult: BarcodeScanResult? {
     didSet {
       if let latestScanResult = latestScanResult {
         print("New scan: \(latestScanResult) :: \(Date())")
         
-        DispatchQueue.main.async { [weak self] in
-          self?.presentCaptureResultTable()
-        }
+        // Update checkoutCardController data here
       }
     }
   }
@@ -34,39 +44,22 @@ class BarcodeCaptureViewController: UIViewController {
     return NSDictionary(contentsOfFile: Bundle.main.path(forResource: "Scandit", ofType: "plist")!) as? Dictionary
   }
   
+  // MARK: - Lifecycle
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .white
     
-    configureScandit()
-    configureLayout()
+    setupScandit()
+    setupPanGesture()
+    
+    setupContraints()
   }
   
-  private func configureScandit() {
-    configureCapture()
-    configureFrameSource()
-    configureCaptureView()
-  }
-  
-}
-
-// MARK: - Move to Coordinator
-
-private extension BarcodeCaptureViewController {
-  
-  func presentCaptureResultTable() {
-    let resultController = CheckoutCartTableViewController()
-    resultController.modalPresentationStyle = .formSheet
-    resultController.isModalInPresentation = true
-    
-    if let sheet = resultController.sheetPresentationController {
-      sheet.prefersGrabberVisible = true
-      sheet.detents = [.medium(), .large(), .custom(resolver: { context in
-        return 100
-      })]
-    }
-    
-    tabBarController?.present(resultController, animated: true)
+  private func setupScandit() {
+    setupCapture()
+    setupFrameSource()
+    setupCaptureView()
   }
   
 }
@@ -97,7 +90,7 @@ private extension BarcodeCaptureViewController {
     return camera
   }
   
-  private func configureCapture() {
+  private func setupCapture() {
     let settings = getBarcodeSettings()
     let camera = getCamera()
     
@@ -108,16 +101,63 @@ private extension BarcodeCaptureViewController {
     self.camera = camera
   }
   
-  private func configureFrameSource() {
+  private func setupFrameSource() {
     context?.setFrameSource(camera)
     camera?.switch(toDesiredState: .on)
   }
   
-  private func configureCaptureView() {
+  private func setupCaptureView() {
     captureView = DataCaptureView(context: context, frame: view.bounds)
     
     let overlay = BarcodeCaptureOverlay(barcodeCapture: barcodeCapture!, view: captureView)
     captureView?.addOverlay(overlay)
+  }
+  
+  private func setupPanGesture() {
+    let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
+    
+    panGesture.delaysTouchesBegan = false
+    panGesture.delaysTouchesEnded = false
+    
+    view.addGestureRecognizer(panGesture)
+  }
+  
+  @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+    let translation = gesture.translation(in: view)
+    let isDraggingUp = translation.y < 0
+    let newHeight = currentCheckoutCardHeight - (translation.y)
+    
+    switch gesture.state {
+      case .changed:
+        if newHeight < checkoutCardMaxHeight {
+          // Keep updating the height constraint as the translation value changes
+          checkoutCardHeightConstraint?.constant = newHeight
+          
+          // Update update dynamic constraints
+          view.layoutIfNeeded()
+        }
+      case .ended:
+        if newHeight < checkoutCardDismissableHeight {
+          self.animateContainerHeight(checkoutCardDefaultHeight)
+        } else if newHeight < checkoutCardDefaultHeight {
+          self.animateContainerHeight(checkoutCardDefaultHeight)
+        } else if newHeight < checkoutCardMaxHeight && !isDraggingUp {
+          animateContainerHeight(checkoutCardDefaultHeight)
+        } else if newHeight > checkoutCardDefaultHeight && isDraggingUp {
+          animateContainerHeight(checkoutCardMaxHeight)
+        }
+      default:
+        break
+    }
+  }
+  
+  private func animateContainerHeight(_ height: CGFloat) {
+    UIView.animate(withDuration: 0.4) { [weak self] in
+      self?.checkoutCardHeightConstraint?.constant = height
+      self?.view.layoutIfNeeded()
+    }
+    
+    currentCheckoutCardHeight = height
   }
   
 }
@@ -156,11 +196,11 @@ extension BarcodeCaptureViewController: BarcodeCaptureListener {
   
 }
 
-// MARK: - Layout
+// MARK: - Constraints
 
 private extension BarcodeCaptureViewController {
   
-  func configureLayout() {
+  func setupContraints() {
     layoutCaptureView()
     layoutResultView()
   }
@@ -182,15 +222,18 @@ private extension BarcodeCaptureViewController {
   }
   
   func layoutResultView() {
-    captureResultController.view.translatesAutoresizingMaskIntoConstraints = false
-    view.addSubview(captureResultController.view)
+    checkoutCardController.view.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(checkoutCardController.view)
     
     NSLayoutConstraint.activate([
-      captureResultController.view.heightAnchor.constraint(equalToConstant: 64),
-      captureResultController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-      captureResultController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-      captureResultController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+      //      checkoutCardController.view.heightAnchor.constraint(equalToConstant: 64),
+      checkoutCardController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+      checkoutCardController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+      checkoutCardController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
     ])
+    
+    checkoutCardHeightConstraint = checkoutCardController.view.heightAnchor.constraint(equalToConstant: checkoutCardDefaultHeight)
+    checkoutCardHeightConstraint?.isActive = true
   }
   
 }

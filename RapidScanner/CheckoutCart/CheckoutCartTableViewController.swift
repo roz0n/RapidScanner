@@ -10,6 +10,7 @@ import UIKit
 class CheckoutCartTableViewController: UIViewController {
   
   static var reuseIdentifier = "CheckoutCartCell"
+  static var defaultShowHeight: CGFloat = 64
   
   var headerView: CheckoutCartHeaderView
   var tableView: UITableView
@@ -34,22 +35,31 @@ class CheckoutCartTableViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    configureTableView()
-    configureLayout()
+    setupTableView()
+    setupContraints()
   }
   
-  private func configureTableView() {
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: CheckoutCartTableViewController.reuseIdentifier)
+  private func setupTableView() {
+    tableView.register(UITableViewCell.self,
+                       forCellReuseIdentifier: CheckoutCartTableViewController.reuseIdentifier)
     tableView.dataSource = dataSource
   }
   
+//  private func setupCheckoutButton() {
+//    headerView.checkoutButton.addTarget(self, action: #selector(tappedCheckoutButton), for: .touchUpInside)
+//  }
+//
+//  @objc func tappedCheckoutButton() {
+//
+//  }
+  
 }
 
-// MARK: - Layout
+// MARK: - Constraints
 
 private extension CheckoutCartTableViewController {
   
-  func configureLayout() {
+  func setupContraints() {
     layoutHeaderView()
     layoutTableView()
   }
@@ -59,7 +69,7 @@ private extension CheckoutCartTableViewController {
     view.addSubview(headerView)
     
     NSLayoutConstraint.activate([
-      headerView.heightAnchor.constraint(equalToConstant: 64),
+      headerView.heightAnchor.constraint(equalToConstant: CheckoutCartTableViewController.defaultShowHeight),
       headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
       headerView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
       headerView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
