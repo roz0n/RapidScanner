@@ -29,6 +29,8 @@
 		232D0B6529984BA000C4A428 /* CheckoutCartHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6429984BA000C4A428 /* CheckoutCartHeaderView.swift */; };
 		232D0B6829984C7200C4A428 /* UIViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6729984C7200C4A428 /* UIViewExtension.swift */; };
 		232D0B6C2998882E00C4A428 /* GrabberView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6B2998882E00C4A428 /* GrabberView.swift */; };
+		232D0B6E299A1EA900C4A428 /* CheckoutCartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6D299A1EA900C4A428 /* CheckoutCartItem.swift */; };
+		232D0B70299A2BC200C4A428 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232D0B6F299A2BC200C4A428 /* ViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +49,8 @@
 		232D0B6429984BA000C4A428 /* CheckoutCartHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutCartHeaderView.swift; sourceTree = "<group>"; };
 		232D0B6729984C7200C4A428 /* UIViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewExtension.swift; sourceTree = "<group>"; };
 		232D0B6B2998882E00C4A428 /* GrabberView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrabberView.swift; sourceTree = "<group>"; };
+		232D0B6D299A1EA900C4A428 /* CheckoutCartItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutCartItem.swift; sourceTree = "<group>"; };
+		232D0B6F299A2BC200C4A428 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +103,7 @@
 				232D0B34299713A200C4A428 /* LaunchScreen.storyboard */,
 				232D0B37299713A200C4A428 /* Info.plist */,
 				232D0B5029971FCB00C4A428 /* Scandit.plist */,
+				232D0B6F299A2BC200C4A428 /* ViewController.swift */,
 			);
 			path = RapidScanner;
 			sourceTree = "<group>";
@@ -107,6 +112,7 @@
 			isa = PBXGroup;
 			children = (
 				232D0B5329976BBA00C4A428 /* BarcodeScanResult.swift */,
+				232D0B6D299A1EA900C4A428 /* CheckoutCartItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -277,6 +283,8 @@
 				232D0B2A299713A100C4A428 /* AppDelegate.swift in Sources */,
 				232D0B5429976BBA00C4A428 /* BarcodeScanResult.swift in Sources */,
 				232D0B2C299713A100C4A428 /* SceneDelegate.swift in Sources */,
+				232D0B70299A2BC200C4A428 /* ViewController.swift in Sources */,
+				232D0B6E299A1EA900C4A428 /* CheckoutCartItem.swift in Sources */,
 				232D0B6C2998882E00C4A428 /* GrabberView.swift in Sources */,
 				232D0B582997719C00C4A428 /* CheckoutCartTableViewController.swift in Sources */,
 				232D0B5A29977F2D00C4A428 /* SettingsViewController.swift in Sources */,

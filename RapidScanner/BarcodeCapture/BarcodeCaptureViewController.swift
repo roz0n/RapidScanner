@@ -69,6 +69,7 @@ class BarcodeCaptureViewController: UIViewController {
         print("New scan: \(latestScanResult) :: \(Date())")
         
         // Update checkoutCardController data here
+        // checkoutCardController.addNewBarcode(latestScanResult)
       }
     }
   }
@@ -86,7 +87,6 @@ class BarcodeCaptureViewController: UIViewController {
     setupPanGesture()
     setupIncrementButton()
     setupContinueButton()
-    
     setupContraints()
   }
   
@@ -234,7 +234,9 @@ extension BarcodeCaptureViewController {
     alertController.addAction(confirmAction)
     alertController.isModalInPresentation = true
     
-    present(alertController, animated: true)
+    present(alertController, animated: true) {
+      self.adjustQuantityButton.becomeFirstResponder()
+    }
   }
   
   private func animateContainerHeight(_ height: CGFloat) {
@@ -263,6 +265,19 @@ extension BarcodeCaptureViewController {
   
   @objc func handleContinueButtonTap(_ sender: UIButton) {
     print("Tapped continue button")
+    
+    guard let latestScanResult else { return }
+    
+    let isDuplicateScan = checkoutCardController.dataSource.barcodeScanData.contains { $0.scanData == latestScanResult }
+    
+    if !isDuplicateScan {
+      print("Adding new item...")
+      checkoutCardController.addNewBarcode(latestScanResult)
+    } else {
+      print("Updating existing item...")
+      checkoutCardController.updateExistingBarcode(latestScanResult)
+    }
+    
     hidePostScanButtons()
   }
   
@@ -295,8 +310,6 @@ extension BarcodeCaptureViewController {
     }
   }
   
-  
-  
 }
 
 // MARK: - BarcodeCaptureListener
@@ -314,6 +327,7 @@ extension BarcodeCaptureViewController: BarcodeCaptureListener {
     }
     
     guard let decodedScanData = try? JSONDecoder().decode(BarcodeScanResult.self, from: scanDataRaw) else {
+      print("Failed to decode scan data")
       return
     }
     
@@ -393,7 +407,7 @@ private extension BarcodeCaptureViewController {
     ])
     
     scanResultButtonsContainerTopConstraint = adjustQuantityButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
-                                                                                 constant: -(UIScreen.main.bounds.height / 2))
+                                                                                        constant: -(UIScreen.main.bounds.height / 2))
     scanResultButtonsContainerTopConstraint?.isActive = true
   }
   

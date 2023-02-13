@@ -16,6 +16,10 @@ class CheckoutCartTableViewController: UIViewController {
   var tableView: UITableView
   var dataSource: CheckoutCartDataSource
   
+  var headerViewQuantity: Int {
+    return dataSource.barcodeScanData.reduce(0) { $0 + $1.quantity }
+  }
+  
   // MARK: - Lifecycle
   
   init(headerView: CheckoutCartHeaderView = CheckoutCartHeaderView(),
@@ -45,13 +49,36 @@ class CheckoutCartTableViewController: UIViewController {
     tableView.dataSource = dataSource
   }
   
-//  private func setupCheckoutButton() {
-//    headerView.checkoutButton.addTarget(self, action: #selector(tappedCheckoutButton), for: .touchUpInside)
-//  }
-//
-//  @objc func tappedCheckoutButton() {
-//
-//  }
+}
+
+// MARK: - Helpers
+
+extension CheckoutCartTableViewController {
+  
+  func addNewBarcode(_ scanResult: BarcodeScanResult) {
+    DispatchQueue.main.async {      
+      let currentQuantity = self.dataSource.barcodeScanData.filter { $0.scanData.data == scanResult.data }.count
+      let newItem = CheckoutCartItem(scanData: scanResult, quantity: (currentQuantity + 1))
+      
+      self.dataSource.barcodeScanData.append(newItem)
+      print("Added new item!")
+      self.headerView.quantityLabel.setTitle("\(self.headerViewQuantity)", for: .normal)
+      self.tableView.reloadData()
+    }
+  }
+  
+  func updateExistingBarcode(_ scanResult: BarcodeScanResult) {
+    if let itemIndex = self.dataSource.barcodeScanData.firstIndex (where: { $0.scanData.data == scanResult.data }) {
+      DispatchQueue.main.async {
+        var item = self.dataSource.barcodeScanData[itemIndex]
+        item.quantity += 1
+        
+        self.dataSource.barcodeScanData[itemIndex] = item
+        self.headerView.quantityLabel.setTitle("\(self.headerViewQuantity)", for: .normal)
+        self.tableView.reloadData()
+      }
+    }
+  }
   
 }
 
